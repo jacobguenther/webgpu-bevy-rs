@@ -3,7 +3,7 @@
 #[repr(C)]
 #[derive(Copy, Clone, Debug, bytemuck::Pod, bytemuck::Zeroable)]
 pub struct Vertex {
-    pub position: [f32; 3],
+	pub position: [f32; 3],
 	pub color: [f32; 3],
 	// pub normal: [f32; 3],
 	// pub tangent: [f32; 3],
@@ -25,10 +25,9 @@ impl Vertex {
 	}
 }
 
-
+use cgmath::InnerSpace;
 use cgmath::Vector3;
 use cgmath::VectorSpace;
-use cgmath::InnerSpace;
 use core::f32::consts::PI;
 
 const TWO_PI: f32 = PI * 2.0;
@@ -48,8 +47,8 @@ pub struct MeshGenerator {
 impl Default for MeshGenerator {
 	fn default() -> Self {
 		Self {
-			vertices: vec!(),
-			indices: vec!(),
+			vertices: vec![],
+			indices: vec![],
 		}
 	}
 }
@@ -65,9 +64,15 @@ impl MeshGenerator {
 		self.vertices.clear();
 		self.indices.clear();
 	}
-	pub fn uv_sphere(&mut self, radius: f32, vertical_subdivisions: usize, horizontal_subdivisions: usize) {
-		let vertex_count =
-			(vertical_subdivisions + 1) * (horizontal_subdivisions + 1);
+	pub fn uv_sphere(
+		&mut self,
+		radius: f32,
+		vertical_subdivisions: usize,
+		horizontal_subdivisions: usize,
+	) {
+		self.clear();
+
+		let vertex_count = (vertical_subdivisions + 1) * (horizontal_subdivisions + 1);
 		let index_count = (vertical_subdivisions - 1) * horizontal_subdivisions * 6;
 
 		self.vertices.reserve(vertex_count);
@@ -86,10 +91,8 @@ impl MeshGenerator {
 		let sector_step = 2.0 * PI / sector_count_f;
 		let stack_step = PI / stack_count_f;
 
-
 		let mut min = 20.0;
 		let mut max = -20.0;
-
 
 		let mut stack_angle = PI * 1.5;
 		for stack in 0..(stack_count + 1) {
@@ -144,7 +147,7 @@ impl MeshGenerator {
 
 		for i in 0..stack_count {
 			let mut k1 = (i * (sector_count + 1)) as u16;
-			let mut k2 = (k1 + sector_count as u16 + 1 ) as u16;
+			let mut k2 = (k1 + sector_count as u16 + 1) as u16;
 
 			for _ in 0..sector_count {
 				if i != 0 {
@@ -162,20 +165,20 @@ impl MeshGenerator {
 	}
 }
 const ORIGINS: &[cgmath::Vector3<f32>] = &[
-	cgmath::Vector3::new(-1.0,-1.0,-1.0),
-	cgmath::Vector3::new( 1.0,-1.0,-1.0),
-	cgmath::Vector3::new( 1.0,-1.0, 1.0),
-	cgmath::Vector3::new(-1.0,-1.0, 1.0),
-	cgmath::Vector3::new(-1.0, 1.0,-1.0),
-	cgmath::Vector3::new(-1.0,-1.0, 1.0),
+	cgmath::Vector3::new(-1.0, -1.0, -1.0),
+	cgmath::Vector3::new(1.0, -1.0, -1.0),
+	cgmath::Vector3::new(1.0, -1.0, 1.0),
+	cgmath::Vector3::new(-1.0, -1.0, 1.0),
+	cgmath::Vector3::new(-1.0, 1.0, -1.0),
+	cgmath::Vector3::new(-1.0, -1.0, 1.0),
 ];
 const RIGHTS: &[cgmath::Vector3<f32>] = &[
-	cgmath::Vector3::new( 1.0, 0.0, 0.0),
-	cgmath::Vector3::new( 0.0, 0.0, 1.0),
+	cgmath::Vector3::new(1.0, 0.0, 0.0),
+	cgmath::Vector3::new(0.0, 0.0, 1.0),
 	cgmath::Vector3::new(-1.0, 0.0, 0.0),
-	cgmath::Vector3::new( 0.0, 0.0,-1.0),
-	cgmath::Vector3::new( 1.0, 0.0, 0.0),
-	cgmath::Vector3::new( 1.0, 0.0, 0.0),
+	cgmath::Vector3::new(0.0, 0.0, -1.0),
+	cgmath::Vector3::new(1.0, 0.0, 0.0),
+	cgmath::Vector3::new(1.0, 0.0, 0.0),
 ];
 const UPS: &[cgmath::Vector3<f32>] = &[
 	cgmath::Vector3::new(0.0, 1.0, 0.0),
@@ -183,5 +186,5 @@ const UPS: &[cgmath::Vector3<f32>] = &[
 	cgmath::Vector3::new(0.0, 1.0, 0.0),
 	cgmath::Vector3::new(0.0, 1.0, 0.0),
 	cgmath::Vector3::new(0.0, 0.0, 1.0),
-	cgmath::Vector3::new(0.0, 0.0,-1.0),
+	cgmath::Vector3::new(0.0, 0.0, -1.0),
 ];

@@ -1,15 +1,12 @@
 // File: render_state.rs
 
-use crate::primitives::*;
-use crate::vertex::*;
-use crate::mesh::*;
 use crate::camera::*;
+use crate::mesh::*;
+use crate::primitives::*;
 use crate::texture::*;
+use crate::vertex::*;
 
-use winit::{
-	window::Window,
-	event::*,
-};
+use winit::{event::*, window::Window};
 
 use wgpu::util::DeviceExt;
 
@@ -41,25 +38,27 @@ impl RenderState {
 		let size = window.inner_size();
 
 		let instance = wgpu::Instance::new(wgpu::Backends::all());
-		let surface = unsafe {
-			instance.create_surface(window)
-		};
-		let adapter = instance.request_adapter(
-			&wgpu::RequestAdapterOptions {
+		let surface = unsafe { instance.create_surface(window) };
+		let adapter = instance
+			.request_adapter(&wgpu::RequestAdapterOptions {
 				power_preference: wgpu::PowerPreference::default(),
 				compatible_surface: Some(&surface),
 				force_fallback_adapter: false,
-			},
-		).await.unwrap();
+			})
+			.await
+			.unwrap();
 
-		let (device, queue) = adapter.request_device(
-			&wgpu::DeviceDescriptor {
-				features: wgpu::Features::empty(),
-				limits: wgpu::Limits::default(),
-				label: None,
-			},
-			None,
-		).await.unwrap();
+		let (device, queue) = adapter
+			.request_device(
+				&wgpu::DeviceDescriptor {
+					features: wgpu::Features::empty(),
+					limits: wgpu::Limits::default(),
+					label: None,
+				},
+				None,
+			)
+			.await
+			.unwrap();
 
 		let config = wgpu::SurfaceConfiguration {
 			usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
@@ -84,16 +83,14 @@ impl RenderState {
 		};
 		let mut camera_uniform = CameraUniform::new();
 		camera_uniform.load_view_proj(&camera);
-		let camera_buffer = device.create_buffer_init(
-			&wgpu::util::BufferInitDescriptor {
-				label: Some("Camera Buffer"),
-				contents: bytemuck::cast_slice(&[camera_uniform]),
-				usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
-			}
-		);
-		let camera_bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-			entries: &[
-				wgpu::BindGroupLayoutEntry {
+		let camera_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+			label: Some("Camera Buffer"),
+			contents: bytemuck::cast_slice(&[camera_uniform]),
+			usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+		});
+		let camera_bind_group_layout =
+			device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+				entries: &[wgpu::BindGroupLayoutEntry {
 					binding: 0,
 					visibility: wgpu::ShaderStages::VERTEX,
 					ty: wgpu::BindingType::Buffer {
@@ -102,20 +99,17 @@ impl RenderState {
 						min_binding_size: None,
 					},
 					count: None,
-				}
-			],
-			label: Some("camera_bind_group_layout"),
-		});
+				}],
+				label: Some("camera_bind_group_layout"),
+			});
 		let camera_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
 			layout: &camera_bind_group_layout,
-			entries: &[
-				wgpu::BindGroupEntry {
-					binding: 0,
-					resource: camera_buffer.as_entire_binding(),
-				}
-			],
+			entries: &[wgpu::BindGroupEntry {
+				binding: 0,
+				resource: camera_buffer.as_entire_binding(),
+			}],
 			label: Some("camera_bind_group"),
-		});		
+		});
 		let camera_controller = {
 			let speed = 1.0;
 			CameraController::new(speed)
@@ -123,19 +117,17 @@ impl RenderState {
 
 		let depth_texture = Texture::create_depth_texture(&device, &config, "depth_texture");
 
-
 		let shader = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
 			label: Some("Shader"),
 			source: wgpu::ShaderSource::Wgsl(include_str!("../assets/shaders/shader.wgsl").into()),
 		});
 
-		let render_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-			label: Some("Render Pipeline Layout"),
-			bind_group_layouts: &[
-				&camera_bind_group_layout
-			],
-			push_constant_ranges: &[],
-		});
+		let render_pipeline_layout =
+			device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+				label: Some("Render Pipeline Layout"),
+				bind_group_layouts: &[&camera_bind_group_layout],
+				push_constant_ranges: &[],
+			});
 
 		let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
 			label: Some("Render Pipeline"),
@@ -143,9 +135,7 @@ impl RenderState {
 			vertex: wgpu::VertexState {
 				module: &shader,
 				entry_point: "vs_main",
-				buffers: &[
-					Vertex::desc(),
-				],
+				buffers: &[Vertex::desc()],
 			},
 			fragment: Some(wgpu::FragmentState {
 				module: &shader,
@@ -183,7 +173,13 @@ impl RenderState {
 		let quad = Mesh::new(&device, Some("quad"), &QUAD_VERTICES, &QUAD_INDICES, 6);
 		let mut sphere_generator = MeshGenerator::default();
 		sphere_generator.uv_sphere(0.2, 16, 16);
-		let sphere = Mesh::new(&device, Some("sphere"), &sphere_generator.vertices, &sphere_generator.indices, sphere_generator.indices.len() as u32);
+		let sphere = Mesh::new(
+			&device,
+			Some("sphere"),
+			&sphere_generator.vertices,
+			&sphere_generator.indices,
+			sphere_generator.indices.len() as u32,
+		);
 		RenderState {
 			surface,
 			device,
@@ -210,23 +206,26 @@ impl RenderState {
 			self.size = winit::dpi::PhysicalSize::new(width, height);
 			self.config.width = width;
 			self.config.height = height;
-			self.depth_texture = Texture::create_depth_texture(&self.device, &self.config, "depth_texture");
+			self.depth_texture =
+				Texture::create_depth_texture(&self.device, &self.config, "depth_texture");
 			self.surface.configure(&self.device, &self.config);
 		}
 	}
 	pub fn input(&mut self, _event: &WindowEvent) -> bool {
 		false
 	}
-	pub fn update(&mut self) {
-		
-	}
+	pub fn update(&mut self) {}
 	pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
 		let output = self.surface.get_current_texture()?;
-		let view = output.texture.create_view(&wgpu::TextureViewDescriptor::default());
+		let view = output
+			.texture
+			.create_view(&wgpu::TextureViewDescriptor::default());
 
-		let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-			label: Some("Render Encoder"),
-		});
+		let mut encoder = self
+			.device
+			.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+				label: Some("Render Encoder"),
+			});
 
 		{
 			let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -259,18 +258,21 @@ impl RenderState {
 			render_pass.set_bind_group(0, &self.camera_bind_group, &[]);
 
 			render_pass.set_vertex_buffer(0, self.quad.vertex_buffer.slice(..));
-			render_pass.set_index_buffer(self.quad.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+			render_pass
+				.set_index_buffer(self.quad.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
 			render_pass.draw_indexed(0..self.quad.num_indices, 0, 0..1);
 
-
 			render_pass.set_vertex_buffer(0, self.sphere.vertex_buffer.slice(..));
-			render_pass.set_index_buffer(self.sphere.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+			render_pass.set_index_buffer(
+				self.sphere.index_buffer.slice(..),
+				wgpu::IndexFormat::Uint16,
+			);
 			render_pass.draw_indexed(0..self.sphere.num_indices, 0, 0..1);
 		}
-	
+
 		self.queue.submit(std::iter::once(encoder.finish()));
 		output.present();
-	
+
 		Ok(())
 	}
 }

@@ -1,11 +1,11 @@
 // File: main.rs
 
-mod primitives;
-mod vertex;
-mod mesh;
-mod render_state;
 mod camera;
+mod mesh;
+mod primitives;
+mod render_state;
 mod texture;
+mod vertex;
 
 use render_state::*;
 
@@ -16,13 +16,8 @@ use winit::{
 };
 
 use bevy::{
-	app::App,
-	app::Events,
-	ecs::system::Commands,
-	ecs::system::EntityCommands,
-	prelude::*,
-	winit::WinitWindows,
-	window::WindowResized,
+	app::App, app::Events, ecs::system::Commands, ecs::system::EntityCommands, prelude::*,
+	window::WindowResized, winit::WinitWindows,
 };
 
 fn init_renderer(mut windows: ResMut<WinitWindows>, mut commands: Commands) {
@@ -36,7 +31,9 @@ fn render(mut renderer: ResMut<RenderState>) {
 }
 fn resize(mut reader: EventReader<WindowResized>, mut renderer: ResMut<RenderState>) {
 	if let Some(event) = reader.iter().next() {
-		renderer.as_mut().resize(event.width as u32, event.height as u32);
+		renderer
+			.as_mut()
+			.resize(event.width as u32, event.height as u32);
 	}
 }
 
@@ -52,4 +49,3 @@ fn main() {
 		.add_system(resize.system())
 		.run();
 }
-

@@ -1,7 +1,7 @@
 // File: projection.rs
 
-use cgmath::Zero;
 use cgmath::SquareMatrix;
+use cgmath::Zero;
 
 use winit::event::WindowEvent;
 
@@ -19,15 +19,15 @@ pub struct CameraUniform {
 	view_projection_matrix: [[f32; 4]; 4],
 }
 impl CameraUniform {
-    pub fn new() -> Self {
-        use cgmath::SquareMatrix;
-        Self {
-            view_projection_matrix: cgmath::Matrix4::identity().into(),
-        }
-    }
-    pub fn load_view_proj(&mut self, camera: &Camera) {
-        self.view_projection_matrix = camera.view_projection_matrix.into();
-    }
+	pub fn new() -> Self {
+		use cgmath::SquareMatrix;
+		Self {
+			view_projection_matrix: cgmath::Matrix4::identity().into(),
+		}
+	}
+	pub fn load_view_proj(&mut self, camera: &Camera) {
+		self.view_projection_matrix = camera.view_projection_matrix.into();
+	}
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -50,7 +50,8 @@ impl Projection {
 		}
 	}
 	fn update_projection_matrix(&mut self) {
-		self.matrix = cgmath::perspective(cgmath::Deg(self.fovy), self.aspect, self.znear, self.zfar);
+		self.matrix =
+			cgmath::perspective(cgmath::Deg(self.fovy), self.aspect, self.znear, self.zfar);
 	}
 	fn aspect(width: u32, height: u32) -> f32 {
 		width as f32 / height as f32
@@ -67,7 +68,11 @@ pub struct Camera {
 	view_projection_matrix: cgmath::Matrix4<f32>,
 }
 impl Camera {
-	pub fn new(eye: cgmath::Point3<f32>, target: cgmath::Point3<f32>, projection: &Projection) -> Self {
+	pub fn new(
+		eye: cgmath::Point3<f32>,
+		target: cgmath::Point3<f32>,
+		projection: &Projection,
+	) -> Self {
 		let mut camera = Self {
 			eye,
 			target,
@@ -88,7 +93,8 @@ impl Camera {
 		self.update_view_projection_matrix();
 	}
 	fn update_view_projection_matrix(&mut self) {
-		self.view_projection_matrix = OPENGL_TO_WGPU_MATRIX * self.projection.matrix * self.view_matrix;
+		self.view_projection_matrix =
+			OPENGL_TO_WGPU_MATRIX * self.projection.matrix * self.view_matrix;
 	}
 
 	pub fn set_eye(&mut self, eye: cgmath::Point3<f32>) {
